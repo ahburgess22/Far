@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D02962402E117A35005827CC /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = D029623F2E117A31005827CC /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D0E3E75B2E0CB2F1007E7A65 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D029623F2E117A31005827CC /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		D0E3E74D2E0CB2E7007E7A65 /* Far.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Far.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0E3E75A2E0CB2F1007E7A65 /* FarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0E3E7642E0CB2F1007E7A65 /* FarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +93,7 @@
 		D0E3E7442E0CB2E7007E7A65 = {
 			isa = PBXGroup;
 			children = (
+				D029623F2E117A31005827CC /* .gitignore */,
 				D0E3E74F2E0CB2E7007E7A65 /* Far */,
 				D0E3E75D2E0CB2F1007E7A65 /* FarTests */,
 				D0E3E7672E0CB2F1007E7A65 /* FarUITests */,
@@ -225,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D02962402E117A35005827CC /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
