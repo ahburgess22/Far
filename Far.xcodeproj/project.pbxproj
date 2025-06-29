@@ -29,9 +29,22 @@
 		D0E3E7642E0CB2F1007E7A65 /* FarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D0E3E7AB2E0CBDAE007E7A65 /* Exceptions for "Far" folder in "Far" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D0E3E74C2E0CB2E7007E7A65 /* Far */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D0E3E74F2E0CB2E7007E7A65 /* Far */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D0E3E7AB2E0CBDAE007E7A65 /* Exceptions for "Far" folder in "Far" target */,
+			);
 			path = Far;
 			sourceTree = "<group>";
 		};
@@ -400,6 +413,11 @@
 				DEVELOPMENT_TEAM = 77Q9QBZFEJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Far/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Far needs camera access to capture photos of your adventures";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Far uses your location to discover new adventures when you visit new places";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Far needs photo library access to add existing photos to your adventures";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +446,11 @@
 				DEVELOPMENT_TEAM = 77Q9QBZFEJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Far/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Far needs camera access to capture photos of your adventures";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Far uses your location to discover new adventures when you visit new places";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Far needs photo library access to add existing photos to your adventures";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

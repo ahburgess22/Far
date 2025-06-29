@@ -2,6 +2,14 @@
 //  AdventureService.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  AdventureService.swift
+//  Far
+//
 //  Handles adventure detection, timing, and persistence logic
 //
 
@@ -16,10 +24,13 @@ class AdventureService: ObservableObject {
     @Published var shouldPromptForAdventure = false
     @Published var pendingAdventureLocation: CLLocation?
     @Published var isTimerActive = false
+    @Published var formattedTimerDuration: String = "00:00"
+    @Published var timerProgress: Double = 0.0
+    @Published var formattedTimeRemaining: String = "05:00"
     
     // MARK: - Configuration Constants
-    private let minimumStayDuration: TimeInterval = 300 // 5 minutes
-    private let newLocationRadius: CLLocationDistance = 100 // 100 meters
+    private let minimumStayDuration: TimeInterval = 60 // 1 minute
+    private let newLocationRadius: CLLocationDistance = 27 // 100 meters
     private let timerUpdateInterval: TimeInterval = 1.0
     private let userDefaultsKey = "SavedAdventures"
     
@@ -40,30 +51,35 @@ class AdventureService: ObservableObject {
     // MARK: - Public Methods
     
     /// Check if the given location should trigger a new adventure
-    func checkForNewAdventure(at location: CLLocation) {
-        // Avoid processing duplicate locations
-        if let lastLocation = lastCheckedLocation,
+    func checkForNewAdventure(at location: CLLocation, forceCheck: Bool = false) {
+        // Only avoid processing duplicates if NOT a forced check
+        if !forceCheck,
+           let lastLocation = lastCheckedLocation,
            location.distance(from: lastLocation) < 5 {
             return
         }
         
         lastCheckedLocation = location
         
+        print("🗺️ Checking location (forced: \(forceCheck)), shouldPrompt: \(shouldPromptForAdventure)")
+            
         if isNewLocation(location) {
+            print("✅ New location detected, starting timer")
             startLocationTimer(for: location)
         } else {
+            print("❌ Not new location, resetting timer")
             resetLocationTimer()
         }
     }
     
     /// Create a new adventure with the given details
-    func createAdventure(name: String, photoData: Data? = nil) {
+    func createAdventure(name: String, photosData: [Data] = []) {
         guard let location = pendingAdventureLocation else { return }
         
         let adventure = Adventure(
             name: name,
             coordinate: location.coordinate,
-            photoData: photoData
+            photosData: photosData
         )
         
         adventures.append(adventure)
@@ -134,17 +150,34 @@ class AdventureService: ObservableObject {
     }
     
     private func updateLocationTimer() {
-        guard let startTime = stableLocationStart else { 
+        guard let startTime = stableLocationStart else {
             resetLocationTimer()
-            return 
+            return
         }
         
-        timeAtCurrentLocation = Date().timeIntervalSince(startTime)
+        let currentTime = Date().timeIntervalSince(startTime)
+        print("⏰ Timer: \(currentTime), shouldPrompt: \(shouldPromptForAdventure)")
         
-        // Check if we've reached the minimum stay duration
-        if timeAtCurrentLocation >= minimumStayDuration && !shouldPromptForAdventure {
-            shouldPromptForAdventure = true
+        // 🔥 THIS IS THE FIX - Ensure main thread for @Published updates:
+        DispatchQueue.main.async {
+            self.timeAtCurrentLocation = currentTime
+            self.formattedTimerDuration = self.formatTimerDuration(currentTime)
+            self.timerProgress = min(currentTime / self.minimumStayDuration, 1.0)
+            self.formattedTimeRemaining = self.formatTimerDuration(max(self.minimumStayDuration - currentTime, 0))
+            
+            // Check if we've reached the minimum stay duration
+            if currentTime >= self.minimumStayDuration && !self.shouldPromptForAdventure {
+                print("🎉 TRIGGERING ADVENTURE PROMPT!")
+                self.shouldPromptForAdventure = true
+            }
         }
+    }
+
+    // Helper function (add this too):
+    private func formatTimerDuration(_ timeInterval: TimeInterval) -> String {
+        let minutes = Int(timeInterval) / 60
+        let seconds = Int(timeInterval) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
     
     private func resetLocationTimer() {
@@ -180,8 +213,11 @@ extension AdventureService {
     
     private func loadAdventures() {
         guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else {
+            print("🗂️ No saved adventures found")
             return
         }
+        
+        print("🗂️ Loading adventures from UserDefaults...")
         
         do {
             adventures = try JSONDecoder().decode([Adventure].self, from: data)
@@ -234,28 +270,8 @@ extension AdventureService {
 
 // MARK: - Utility Extensions
 extension AdventureService {
-    /// Format the current timer duration as a string
-    var formattedTimerDuration: String {
-        let minutes = Int(timeAtCurrentLocation) / 60
-        let seconds = Int(timeAtCurrentLocation) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-    
-    /// Progress towards the minimum stay duration (0.0 to 1.0)
-    var timerProgress: Double {
-        return min(timeAtCurrentLocation / minimumStayDuration, 1.0)
-    }
-    
     /// Remaining time until adventure prompt
     var timeRemaining: TimeInterval {
         return max(minimumStayDuration - timeAtCurrentLocation, 0)
-    }
-    
-    /// Format remaining time as a string
-    var formattedTimeRemaining: String {
-        let remaining = timeRemaining
-        let minutes = Int(remaining) / 60
-        let seconds = Int(remaining) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
     }
 }

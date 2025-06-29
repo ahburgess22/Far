@@ -2,13 +2,21 @@
 //  AdventureCreationView.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  AdventureCreationView.swift
+//  Far
+//
 //  Modal view for creating new adventures
 //
 
 import SwiftUI
 
 struct AdventureCreationView: View {
-    let onSave: (String, Data?) -> Void
+    let onSave: (String, Data?) -> ()
     let onDismiss: () -> Void
     
     @State private var adventureName = ""
@@ -286,7 +294,7 @@ struct PhotoOptionButton: View {
 struct ActionButtons: View {
     let adventureName: String
     let selectedImageData: Data?
-    let onSave: (String, Data?) -> Void
+    let onSave: (String, Data?) -> ()
     let onDismiss: () -> Void
     
     @Environment(\.dismiss) private var dismiss

@@ -2,6 +2,14 @@
 //  ContentView.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  ContentView.swift
+//  Far
+//
 //  Main content view for the Far app
 //
 
@@ -20,7 +28,7 @@ struct ContentView: View {
                     LocationStatusCard(viewModel: viewModel)
                     
                     if viewModel.isTimingLocation {
-                        AdventureTimerCard(viewModel: viewModel)
+                        AdventureTimerCard(adventureService: viewModel.adventureService)  // ✅ Pass service directly
                     }
                     
                     AdventureStatsCard(viewModel: viewModel)
@@ -147,7 +155,7 @@ struct LocationStatusCard: View {
 
 // MARK: - Adventure Timer Card
 struct AdventureTimerCard: View {
-    @ObservedObject var viewModel: FarViewModel
+    @ObservedObject var adventureService: AdventureService  // ✅ Observe service directly
     
     var body: some View {
         VStack(spacing: 16) {
@@ -160,7 +168,7 @@ struct AdventureTimerCard: View {
                     Text("New Location Detected")
                         .font(.headline)
                     
-                    Text("Stay for \(viewModel.timeRemaining) more")
+                    Text("Stay for \(adventureService.formattedTimeRemaining) more")  // ✅ Direct access
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -169,12 +177,12 @@ struct AdventureTimerCard: View {
             }
             
             VStack(spacing: 8) {
-                Text(viewModel.formattedTimer)
+                Text(adventureService.formattedTimerDuration)  // ✅ Direct access
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
                 
-                ProgressView(value: viewModel.timerProgress)
+                ProgressView(value: adventureService.timerProgress)  // ✅ Direct access
                     .progressViewStyle(LinearProgressViewStyle(tint: .blue))
                     .scaleEffect(y: 2)
             }
@@ -308,7 +316,7 @@ struct AdventureRowView: View {
             Spacer()
             
             HStack(spacing: 8) {
-                if adventure.hasPhoto {
+                if adventure.hasPhotos {
                     Image(systemName: "camera.fill")
                         .foregroundColor(.blue)
                         .font(.caption)

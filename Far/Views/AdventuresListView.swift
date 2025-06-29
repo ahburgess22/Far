@@ -1,4 +1,12 @@
 //
+//  AdventuresListView.swift
+//  Far
+//
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
 //  SupportingViews.swift
 //  Far
 //
@@ -92,11 +100,24 @@ struct AdventureGridCard: View {
         VStack(alignment: .leading, spacing: 8) {
             // Photo or placeholder
             Group {
-                if let photoData = adventure.photoData,
-                   let uiImage = UIImage(data: photoData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+//                if let photoData = adventure.photoData,
+//                   let uiImage = UIImage(data: photoData) {
+//                    Image(uiImage: uiImage)
+//                        .resizable()
+//                        .aspectRatio(contentMode: .fill)
+                if !adventure.photosData.isEmpty {
+                    LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
+                        ForEach(adventure.photosData.indices) { index in
+                            // Create UIImage from adventure.photosData[index]
+                            if let uiImage = UIImage(data: adventure.photosData[index]) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            }
+                            // Display each photo
+                            // Add tap gesture for full screen later
+                        }
+                    }
                 } else {
                     Image(systemName: "photo")
                         .font(.title)
@@ -105,7 +126,7 @@ struct AdventureGridCard: View {
                         .background(Color(.systemGray6))
                 }
             }
-            .frame(height: 120)
+            .frame(height: 115)
             .clipped()
             .cornerRadius(8)
             
@@ -138,13 +159,22 @@ struct AdventureDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Hero image or placeholder
                     Group {
-                        if let photoData = adventure.photoData,
-                           let uiImage = UIImage(data: photoData) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(height: 250)
-                                .clipped()
+//                        if let photoData = adventure.photosData,
+//                           let uiImage = UIImage(data: photoData) {
+//                            Image(uiImage: uiImage)
+//                                .resizable()
+//                                .aspectRatio(contentMode: .fill)
+//                                .frame(height: 250)
+//                                .clipped()
+                        if !adventure.photosData.isEmpty {
+                            if let firstPhotoData = adventure.photosData.first,
+                               let uiImage = UIImage(data: firstPhotoData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(height: 250)
+                                    .clipped()
+                            }
                         } else {
                             ZStack {
                                 Rectangle()

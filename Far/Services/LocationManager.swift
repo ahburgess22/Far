@@ -2,6 +2,14 @@
 //  LocationManager.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  LocationManager.swift
+//  Far
+//
 //  Handles Core Location services, permissions, and GPS tracking
 //
 
@@ -127,6 +135,9 @@ extension LocationManager: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // Don't show error if we haven't even requested permission yet
+        guard authorizationStatus != .notDetermined else { return }
+        
         DispatchQueue.main.async {
             if let clError = error as? CLError {
                 switch clError.code {

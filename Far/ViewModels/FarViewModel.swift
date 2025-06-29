@@ -2,6 +2,14 @@
 //  FarViewModel.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  FarViewModel.swift
+//  Far
+//
 //  Main view model that coordinates between LocationManager and AdventureService
 //
 
@@ -46,7 +54,9 @@ class FarViewModel: ObservableObject {
         adventureService.$shouldPromptForAdventure
             .receive(on: DispatchQueue.main)
             .sink { [weak self] shouldPrompt in
+                print("🎯 shouldPromptForAdventure changed to: \(shouldPrompt)")
                 if shouldPrompt {
+                    print("📱 Setting showingAdventureCreation = true")
                     self?.showingAdventureCreation = true
                 }
             }
@@ -104,8 +114,17 @@ class FarViewModel: ObservableObject {
     }
     
     /// Create a new adventure
-    func createAdventure(name: String, photoData: Data? = nil) {
-        adventureService.createAdventure(name: name, photoData: photoData)
+    func createAdventure(name: String, photoData: Data?) {
+        // Convert single photo to array format
+            let photosArray: [Data] = {
+                if let photoData = photoData {
+                    return [photoData]  // Single photo becomes array with 1 element
+                } else {
+                    return []           // No photo becomes empty array
+                }
+            }()
+        
+        adventureService.createAdventure(name: name, photosData: photosArray)
         showingAdventureCreation = false
     }
     
@@ -123,6 +142,16 @@ class FarViewModel: ObservableObject {
     /// Refresh current location
     func refreshLocation() {
         locationManager.requestLocationUpdate()
+        
+        // Force check current location if we already have one
+        if let currentLocation = locationManager.currentLocation {
+            adventureService.checkForNewAdventure(at: currentLocation, forceCheck: true)
+            
+            // 🔥 Force UI update after a brief delay to let the timer logic run
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.objectWillChange.send()  // Trigger UI refresh
+            }
+        }
     }
     
     /// Handle error display
@@ -229,8 +258,9 @@ extension FarViewModel {
     /// Reset all data (for settings/debug purposes)
     func resetAllData() {
         adventureService.adventures.removeAll()
+        UserDefaults.standard.removeObject(forKey: "SavedAdventures") // Clears UserDefaults
         adventureService.dismissAdventurePrompt()
-        // Note: This will trigger automatic save via the service
+        refreshLocation()  // Check if current location is now "new"
     }
     
     /// Get app statistics for settings display

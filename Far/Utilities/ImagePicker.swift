@@ -2,6 +2,14 @@
 //  ImagePicker.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  ImagePicker.swift
+//  Far
+//
 //  UIKit wrapper for camera and photo library access
 //
 

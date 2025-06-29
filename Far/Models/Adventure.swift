@@ -2,6 +2,14 @@
 //  Adventure.swift
 //  Far
 //
+//  Created by Austin Burgess on 6/25/25.
+//
+
+
+//
+//  Adventure.swift
+//  Far
+//
 //  Adventure data model with proper Codable implementation for persistence
 //
 
@@ -9,24 +17,24 @@ import Foundation
 import CoreLocation
 
 struct Adventure: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     let name: String
     let coordinate: CLLocationCoordinate2D
     let timestamp: Date
-    let photoData: Data?
+    var photosData: [Data]
     let address: String?
     
     // Custom coding keys for CLLocationCoordinate2D
     enum CodingKeys: String, CodingKey {
-        case id, name, timestamp, photoData, address
+        case id, name, timestamp, photosData, address
         case latitude, longitude
     }
     
-    init(name: String, coordinate: CLLocationCoordinate2D, photoData: Data? = nil, address: String? = nil) {
+    init(name: String, coordinate: CLLocationCoordinate2D, photosData: [Data] = [], address: String? = nil) {
         self.name = name
         self.coordinate = coordinate
         self.timestamp = Date()
-        self.photoData = photoData
+        self.photosData = photosData
         self.address = address
     }
     
@@ -36,7 +44,7 @@ struct Adventure: Identifiable, Codable {
         id = try container.decode(UUID.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         timestamp = try container.decode(Date.self, forKey: .timestamp)
-        photoData = try container.decodeIfPresent(Data.self, forKey: .photoData)
+        photosData = try container.decode([Data].self, forKey: .photosData)
         address = try container.decodeIfPresent(String.self, forKey: .address)
         
         let latitude = try container.decode(Double.self, forKey: .latitude)
@@ -49,7 +57,7 @@ struct Adventure: Identifiable, Codable {
         try container.encode(id, forKey: .id)
         try container.encode(name, forKey: .name)
         try container.encode(timestamp, forKey: .timestamp)
-        try container.encodeIfPresent(photoData, forKey: .photoData)
+        try container.encode(photosData, forKey: .photosData)
         try container.encodeIfPresent(address, forKey: .address)
         try container.encode(coordinate.latitude, forKey: .latitude)
         try container.encode(coordinate.longitude, forKey: .longitude)
@@ -73,7 +81,7 @@ extension Adventure {
     }
     
     /// Returns true if this adventure has a photo
-    var hasPhoto: Bool {
-        return photoData != nil
+    var hasPhotos: Bool {
+        return !photosData.isEmpty
     }
 }
