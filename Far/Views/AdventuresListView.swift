@@ -19,6 +19,7 @@ import CoreLocation
 // MARK: - Adventures List View
 struct AdventuresListView: View {
     let adventures: [Adventure]
+    let viewModel: FarViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -27,7 +28,7 @@ struct AdventuresListView: View {
                 if adventures.isEmpty {
                     EmptyAdventuresView()
                 } else {
-                    AdventuresGrid(adventures: adventures)
+                    AdventuresGrid(adventures: adventures, viewModel: viewModel)
                 }
             }
             .navigationTitle("All Adventures")
@@ -67,6 +68,7 @@ struct EmptyAdventuresView: View {
 // MARK: - Adventures Grid
 struct AdventuresGrid: View {
     let adventures: [Adventure]
+    let viewModel: FarViewModel
     @State private var selectedAdventure: Adventure?
     
     private let columns = [
@@ -87,12 +89,12 @@ struct AdventuresGrid: View {
             .padding()
         }
         .sheet(item: $selectedAdventure) { adventure in
-            AdventureDetailView(adventure: adventure)
+            AdventureDetailView(adventure: adventure, viewModel: viewModel)
         }
     }
 }
 
-// MARK: - Adventure Grid Card
+// **MARK: - Adventure Grid Card**
 struct AdventureGridCard: View {
     let adventure: Adventure
     
@@ -100,23 +102,13 @@ struct AdventureGridCard: View {
         VStack(alignment: .leading, spacing: 8) {
             // Photo or placeholder
             Group {
-//                if let photoData = adventure.photoData,
-//                   let uiImage = UIImage(data: photoData) {
-//                    Image(uiImage: uiImage)
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fill)
                 if !adventure.photosData.isEmpty {
-                    LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
-                        ForEach(adventure.photosData.indices) { index in
-                            // Create UIImage from adventure.photosData[index]
-                            if let uiImage = UIImage(data: adventure.photosData[index]) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            }
-                            // Display each photo
-                            // Add tap gesture for full screen later
-                        }
+                    // Show the first photo as hero image
+                    if let firstPhotoData = adventure.photosData.first,
+                       let uiImage = UIImage(data: firstPhotoData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
                     }
                 } else {
                     Image(systemName: "photo")
@@ -129,6 +121,26 @@ struct AdventureGridCard: View {
             .frame(height: 115)
             .clipped()
             .cornerRadius(8)
+            // Photo count badge overlay
+            .overlay(alignment: .topTrailing) {
+                if adventure.photosData.count > 1 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "photo.stack")
+                            .font(.caption2)
+                        Text("\(adventure.photosData.count)")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(.black.opacity(0.7))
+                    )
+                    .padding(8)
+                }
+            }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(adventure.name)
@@ -148,10 +160,23 @@ struct AdventureGridCard: View {
     }
 }
 
-// MARK: - Adventure Detail View
+// **MARK: - Adventure Detail View**
 struct AdventureDetailView: View {
     let adventure: Adventure
+    let viewModel: FarViewModel
     @Environment(\.dismiss) private var dismiss
+    
+    // State for photo selection
+    @State private var showingImagePicker = false
+    @State private var showingPhotoSourceAlert = false
+    @State private var imageSourceType: ImagePicker.SourceType = .camera
+    @State private var selectedImageData: Data? = nil
+    
+    private let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
     
     var body: some View {
         NavigationView {
@@ -159,13 +184,6 @@ struct AdventureDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Hero image or placeholder
                     Group {
-//                        if let photoData = adventure.photosData,
-//                           let uiImage = UIImage(data: photoData) {
-//                            Image(uiImage: uiImage)
-//                                .resizable()
-//                                .aspectRatio(contentMode: .fill)
-//                                .frame(height: 250)
-//                                .clipped()
                         if !adventure.photosData.isEmpty {
                             if let firstPhotoData = adventure.photosData.first,
                                let uiImage = UIImage(data: firstPhotoData) {
@@ -199,6 +217,67 @@ struct AdventureDetailView: View {
                         AdventureLocationSection(adventure: adventure)
                     }
                     .padding()
+                    
+                    // Photo Gallery Section
+                    if adventure.photosData.count > 1 {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Image(systemName: "photo.stack")
+                                    .foregroundColor(.blue)
+                                Text("All Photos (\(adventure.photosData.count))")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                            }
+                            .padding(.horizontal)
+                            
+                            LazyVGrid(columns: columns, spacing: 8) {
+                                ForEach(adventure.photosData.indices, id: \.self) { index in
+                                    if let uiImage = UIImage(data: adventure.photosData[index]) {
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(height: 100)
+                                            .clipped()
+                                            .cornerRadius(8)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    } else if adventure.photosData.count == 1 {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Image(systemName: "photo")
+                                    .foregroundColor(.blue)
+                                Text("Photo")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                    
+                    // Add Photo Button
+                    VStack(spacing: 12) {
+                        Divider()
+                        
+                        Button(action: {
+                            showingPhotoSourceAlert = true
+                        }) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Add Photo")
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom)
+                    }
                 }
             }
             .navigationTitle("Adventure")
@@ -209,6 +288,32 @@ struct AdventureDetailView: View {
                         dismiss()
                     }
                 }
+            }
+        }
+        .actionSheet(isPresented: $showingPhotoSourceAlert) {
+            ActionSheet(
+                title: Text("Add Photo"),
+                message: Text("Choose how you'd like to add a photo"),
+                buttons: [
+                    .default(Text("Camera")) {
+                        imageSourceType = .camera
+                        showingImagePicker = true
+                    },
+                    .default(Text("Photo Library")) {
+                        imageSourceType = .photoLibrary
+                        showingImagePicker = true
+                    },
+                    .cancel()
+                ]
+            )
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(sourceType: imageSourceType, imageData: $selectedImageData)
+        }
+        .onChange(of: selectedImageData) { oldValue, newValue in
+            if let imageData = newValue {
+                viewModel.addPhotoToAdventure(adventureId: adventure.id, photoData: imageData)
+                selectedImageData = nil // Reset for next use
             }
         }
     }

@@ -74,7 +74,7 @@ struct ContentView: View {
                 )
             }
             .sheet(isPresented: $viewModel.showingAdventuresList) {
-                AdventuresListView(adventures: viewModel.adventureService.sortedAdventures)
+                AdventuresListView(adventures: viewModel.adventureService.sortedAdventures, viewModel: viewModel)
             }
             .sheet(isPresented: $viewModel.showingSettings) {
                 SettingsView(viewModel: viewModel)

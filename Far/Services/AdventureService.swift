@@ -202,7 +202,7 @@ class AdventureService: ObservableObject {
 
 // MARK: - Persistence
 extension AdventureService {
-    private func saveAdventures() {
+    func saveAdventures() {
         do {
             let encoded = try JSONEncoder().encode(adventures)
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)

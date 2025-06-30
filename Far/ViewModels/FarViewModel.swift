@@ -166,6 +166,30 @@ class FarViewModel: ObservableObject {
         showingError = false
     }
     
+    /// Add new photo to adventure
+    func addPhotoToAdventure(adventureId: UUID, photoData: Data) {
+        // Find the adventure index in the AdventureService
+        guard let adventureIndex = adventureService.adventures.firstIndex(where: { $0.id == adventureId }) else {
+            print("Adventure not found with ID: \(adventureId)")
+            return
+        }
+        
+        // Create updated adventure with new photo
+        var updatedAdventure = adventureService.adventures[adventureIndex]
+        updatedAdventure.photosData.append(photoData)
+        
+        // Update the adventure in the AdventureService array
+        adventureService.adventures[adventureIndex] = updatedAdventure
+        
+        // Save using AdventureService method
+        adventureService.saveAdventures()
+        
+        print("Added photo to adventure: \(updatedAdventure.name). Total photos: \(updatedAdventure.photosData.count)")
+    }
+
+    // Example if your adventures property is called 'savedAdventures':
+    // guard let adventureIndex = savedAdventures.firstIndex(where: { $0.id == adventureId }) else {
+    
     // MARK: - App Lifecycle
     
     @objc private func appDidBecomeActive() {
